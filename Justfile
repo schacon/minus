@@ -1,7 +1,7 @@
 _prechecks:
   -cargo hack 2> /dev/null
-
-  if [ $? == 101 ]; then \
+  
+  if [ $? -eq 101 ]; then \
     cargo install cargo-hack; \
   fi
 
