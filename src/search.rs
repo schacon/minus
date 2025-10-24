@@ -323,7 +323,7 @@ where
         iso.line_numbers,
         so.cols.into(),
         iso.screen.line_wrapping,
-        &so.compiled_regex,
+        so.compiled_regex.as_ref(),
     );
     let position_of_next_match =
         next_nth_match(&format_result.append_search_idx, iso.initial_upper_mark, 0);

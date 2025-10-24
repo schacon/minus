@@ -254,7 +254,7 @@ impl PagerState {
             self.cols,
             self.screen.line_wrapping,
             #[cfg(feature = "search")]
-            &self.search_state.search_term,
+            self.search_state.search_term.as_ref(),
         );
 
         #[cfg(feature = "search")]
@@ -364,7 +364,7 @@ impl PagerState {
         }
     }
 
-    pub(crate) fn append_str(&mut self, text: &str) -> AppendStyle {
+    pub(crate) fn append_str(&'_ mut self, text: &str) -> AppendStyle<'_> {
         let old_lc = self.screen.line_count();
         let old_lc_dgts = minus_core::utils::digits(old_lc);
         let mut append_result = self.screen.push_screen_buf(
@@ -372,7 +372,7 @@ impl PagerState {
             self.line_numbers,
             self.cols.try_into().unwrap(),
             #[cfg(feature = "search")]
-            &self.search_state.search_term,
+            self.search_state.search_term.as_ref(),
         );
         let new_lc = self.screen.line_count();
         let new_lc_dgts = minus_core::utils::digits(new_lc);

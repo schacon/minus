@@ -83,7 +83,7 @@ impl Screen {
         text: TextBlock,
         line_numbers: LineNumbers,
         cols: u16,
-        #[cfg(feature = "search")] search_term: &Option<Regex>,
+        #[cfg(feature = "search")] search_term: Option<&Regex>,
     ) -> FormatResult {
         // If the last line of self.screen.orig_text is not terminated by than the first line of
         // the incoming text is part of that line so we also need to take care of that.
@@ -259,7 +259,7 @@ where
     pub prev_unterminated: usize,
     /// Search term if a search is active
     #[cfg(feature = "search")]
-    pub search_term: &'a Option<regex::Regex>,
+    pub search_term: Option<&'a regex::Regex>,
 
     /// Value of [PagerState::line_wrapping]
     pub line_wrapping: bool,
@@ -512,7 +512,7 @@ pub(crate) fn formatted_line<'a>(
     line_wrapping: bool,
     #[cfg(feature = "search")] formatted_idx: usize,
     #[cfg(feature = "search")] search_idx: &mut BTreeSet<usize>,
-    #[cfg(feature = "search")] search_term: &Option<regex::Regex>,
+    #[cfg(feature = "search")] search_term: Option<&regex::Regex>,
 ) -> Rows {
     assert!(
         !line.contains('\n'),
@@ -626,7 +626,7 @@ pub(crate) fn make_format_lines(
     line_numbers: LineNumbers,
     cols: usize,
     line_wrapping: bool,
-    #[cfg(feature = "search")] search_term: &Option<regex::Regex>,
+    #[cfg(feature = "search")] search_term: Option<&regex::Regex>,
 ) -> (Rows, FormatResult) {
     let mut buffer = Vec::with_capacity(256);
     let format_opts = FormatOpts {
