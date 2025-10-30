@@ -339,7 +339,9 @@ mod tests {
     use crate::{minus_core::CommandQueue, ExitStrategy, PagerState, RunMode};
     #[cfg(feature = "search")]
     use parking_lot::{Condvar, Mutex};
-    use std::sync::{atomic::AtomicBool, Arc, LazyLock};
+    #[cfg(feature = "search")]
+    use std::sync::LazyLock;
+    use std::sync::{atomic::AtomicBool, Arc};
 
     // Tests constants
     #[cfg(feature = "search")]
