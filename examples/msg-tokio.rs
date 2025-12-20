@@ -8,7 +8,7 @@ async fn main() -> Result<(), MinusError> {
 
     let increment = async {
         for i in 0..=10_u32 {
-            output.push_str(&format!("{}\n", i))?;
+            output.push_str(format!("{}\n", i))?;
             sleep(Duration::from_millis(100)).await;
         }
         output.send_message("No more output to come")?;

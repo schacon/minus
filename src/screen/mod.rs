@@ -52,7 +52,7 @@ impl Screen {
     /// Get the actual number of physical rows that the text that will actually occupy on the
     /// terminal
     #[must_use]
-    pub fn formatted_lines_count(&self) -> usize {
+    pub const fn formatted_lines_count(&self) -> usize {
         self.formatted_lines.len()
     }
     /// Get the number of [`Lines`](std::str::Lines) in the text.
@@ -83,7 +83,7 @@ impl Screen {
         text: TextBlock,
         line_numbers: LineNumbers,
         cols: u16,
-        #[cfg(feature = "search")] search_term: &Option<Regex>,
+        #[cfg(feature = "search")] search_term: Option<&Regex>,
     ) -> FormatResult {
         // If the last line of self.screen.orig_text is not terminated by than the first line of
         // the incoming text is part of that line so we also need to take care of that.
@@ -259,7 +259,7 @@ where
     pub prev_unterminated: usize,
     /// Search term if a search is active
     #[cfg(feature = "search")]
-    pub search_term: &'a Option<regex::Regex>,
+    pub search_term: Option<&'a regex::Regex>,
 
     /// Value of [PagerState::line_wrapping]
     pub line_wrapping: bool,
@@ -335,8 +335,7 @@ where
     // * After all the formatting is done, we return the format results.
 
     // Compute the text to be format and set clean_append
-    let to_format;
-    if let Some(attached_text) = opts.attachment {
+    let to_format = if let Some(attached_text) = opts.attachment {
         // Tweak certain parameters if we are joining the last line of already present text with the first line of
         // incoming text.
         //
@@ -354,10 +353,10 @@ where
         s.push_str(attached_text);
         s.push_str(opts.text);
 
-        to_format = s;
+        s
     } else {
-        to_format = opts.text.to_string();
-    }
+        opts.text.to_string()
+    };
 
     let lines = to_format
         .lines()
@@ -491,12 +490,12 @@ where
 /// - `line`: The line to format
 /// - `line_numbers`: tells whether to format the line with line numbers.
 /// - `len_line_number`: is the number of digits that number of lines in [`PagerState::lines`] occupy.
-///     For example, this will be 2 if number of lines in [`PagerState::lines`] is 50 and 3 if
-///     number of lines in [`PagerState::lines`] is 500. This is used for calculating the padding
-///     of each displayed line.
+///   For example, this will be 2 if number of lines in [`PagerState::lines`] is 50 and 3 if
+///   number of lines in [`PagerState::lines`] is 500. This is used for calculating the padding
+///   of each displayed line.
 /// - `idx`: is the position index where the line is placed in [`PagerState::lines`].
 /// - `formatted_idx`: is the position index where the line will be placed in the resulting
-///    [`PagerState::formatted_lines`](crate::state::PagerState::formatted_lines)
+///   [`PagerState::formatted_lines`](crate::state::PagerState::formatted_lines)
 /// - `cols`: Number of columns in the terminal
 /// - `search_term`: Contains the regex if a search is active
 ///
@@ -512,7 +511,7 @@ pub(crate) fn formatted_line<'a>(
     line_wrapping: bool,
     #[cfg(feature = "search")] formatted_idx: usize,
     #[cfg(feature = "search")] search_idx: &mut BTreeSet<usize>,
-    #[cfg(feature = "search")] search_term: &Option<regex::Regex>,
+    #[cfg(feature = "search")] search_term: Option<&regex::Regex>,
 ) -> Rows {
     assert!(
         !line.contains('\n'),
@@ -626,7 +625,7 @@ pub(crate) fn make_format_lines(
     line_numbers: LineNumbers,
     cols: usize,
     line_wrapping: bool,
-    #[cfg(feature = "search")] search_term: &Option<regex::Regex>,
+    #[cfg(feature = "search")] search_term: Option<&regex::Regex>,
 ) -> (Rows, FormatResult) {
     let mut buffer = Vec::with_capacity(256);
     let format_opts = FormatOpts {

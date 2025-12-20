@@ -1,10 +1,9 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::LazyLock};
 
 use super::{Token, MODIFIERS};
 use crossterm::event::{KeyModifiers, MouseButton, MouseEvent, MouseEventKind};
-use once_cell::sync::Lazy;
 
-static MOUSE_ACTIONS: Lazy<HashMap<&str, MouseEventKind>> = Lazy::new(|| {
+static MOUSE_ACTIONS: LazyLock<HashMap<&str, MouseEventKind>> = LazyLock::new(|| {
     let mut map = HashMap::new();
 
     map.insert("left:down", MouseEventKind::Down(MouseButton::Left));
@@ -68,7 +67,7 @@ fn gen_mouse_event_from_tokenlist(token_list: &[Token], text: &str) -> MouseEven
                 );
             }
             Token::MultipleChar(c) => {
-                let c = c.to_ascii_lowercase().to_string();
+                let c = c.to_ascii_lowercase().clone();
                 MOUSE_ACTIONS.get(c.as_str()).map_or_else(
                     || panic!("'{}': Invalid key input sequence given", text),
                     |k| {

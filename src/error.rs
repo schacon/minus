@@ -104,7 +104,7 @@ pub enum MinusError {
     #[cfg_attr(docsrs, doc(cfg(feature = "search")))]
     SearchExpError(#[from] RegexError),
 
-    #[cfg(feature = "tokio")]
+    #[cfg(test)]
     #[error(transparent)]
     #[cfg_attr(docsrs, doc(cfg(feature = "tokio")))]
     JoinError(#[from] tokio::task::JoinError),

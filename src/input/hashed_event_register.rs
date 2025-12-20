@@ -223,12 +223,14 @@ where
         }
     }
 
-    /// Add all elemnts of `desc` as key bindings that minus should respond to with the callback `cb`
+    /// Add all elemnts of `desc` as key bindings that minus should respond to with the callback `cb`.
+    ///
+    /// Prefer using this over [add_key_events](HashedEventRegister::add_key_events).
+    ///
+    /// # Panics
     ///
     /// This will panic if you the keybinding has been previously defined, unless the `remap`
     /// is set to true. This helps preventing accidental overrides of your keybindings.
-    ///
-    /// Prefer using this over [add_key_events](HashedEventRegister::add_key_events).
     ///
     /// # Example
     /// ```should_panic
@@ -308,12 +310,14 @@ where
         }
     }
 
-    /// Add all elemnts of `desc` as mouse bindings that minus should respond to with the callback `cb`
+    /// Add all elemnts of `desc` as mouse bindings that minus should respond to with the callback `cb`.
     ///
+    /// Prefer using this over [add_mouse_events](HashedEventRegister::add_mouse_events).
+    ///
+    /// # Panics
     /// This will panic if you the keybinding has been previously defined, unless the `remap`
     /// is set to true. This helps preventing accidental overrides of your keybindings.
     ///
-    /// Prefer using this over [add_mouse_events](HashedEventRegister::add_mouse_events).
     /// # Example
     /// ```should_panic
     /// use minus::input::{InputEvent, HashedEventRegister};

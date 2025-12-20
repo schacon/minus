@@ -5,7 +5,7 @@ fn main() -> Result<(), MinusError> {
 
     for i in 0..30 {
         for _ in 0..=10 {
-            output.push_str(&format!("{}. Hello ", i))?;
+            output.push_str(format!("{}. Hello ", i))?;
         }
         output.push_str("\n")?;
     }

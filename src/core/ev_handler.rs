@@ -287,9 +287,9 @@ pub fn handle_event(
 
         Command::SetPrompt(ref text) | Command::SendMessage(ref text) => {
             if let Command::SetPrompt(_) = ev {
-                p.prompt = text.to_string();
+                p.prompt = text.clone();
             } else {
-                p.message = Some(text.to_string());
+                p.message = Some(text.clone());
             }
             p.format_prompt();
             if !p.running.lock().is_uninitialized() {
@@ -337,17 +337,16 @@ mod tests {
     use super::super::commands::Command;
     use super::handle_event;
     use crate::{minus_core::CommandQueue, ExitStrategy, PagerState, RunMode};
-    use std::sync::{atomic::AtomicBool, Arc};
     #[cfg(feature = "search")]
-    use {
-        once_cell::sync::Lazy,
-        parking_lot::{Condvar, Mutex},
-    };
+    use parking_lot::{Condvar, Mutex};
+    #[cfg(feature = "search")]
+    use std::sync::LazyLock;
+    use std::sync::{atomic::AtomicBool, Arc};
 
     // Tests constants
     #[cfg(feature = "search")]
-    static UIA: Lazy<Arc<(Mutex<bool>, Condvar)>> =
-        Lazy::new(|| Arc::new((Mutex::new(true), Condvar::new())));
+    static UIA: LazyLock<Arc<(Mutex<bool>, Condvar)>> =
+        LazyLock::new(|| Arc::new((Mutex::new(true), Condvar::new())));
     const TEST_STR: &str = "This is some sample text";
 
     // Tests for event emitting functions of Pager

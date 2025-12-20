@@ -207,7 +207,7 @@ pub fn draw_append_text(
             crossterm::execute!(out, crossterm::terminal::Clear(ClearType::CurrentLine))?;
         }
         for line in &fmt_text[0..num_appendable] {
-            write!(out, "{}\n\r", line)?;
+            write!(out, "{line}\n\r")?;
         }
         out.flush()?;
     }

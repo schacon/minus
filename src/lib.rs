@@ -20,10 +20,10 @@
 //! # Overview
 //! When getting started with minus, the two most important concepts to get familier with are:
 //! * The [Pager] type: which acts as a bridge between your application and minus. It is used
-//! to pass data and configure minus before and after starting the pager.
+//!   to pass data and configure minus before and after starting the pager.
 //! * Initialization functions: This includes the [dynamic_paging] and [page_all] functions which
-//! take a [Pager] as argument. They are responsible for generating the initial state and starting
-//! the pager.
+//!   take a [Pager] as argument. They are responsible for generating the initial state and starting
+//!   the pager.
 //!
 //! See the docs for the respective items to learn more on its usage.
 //!

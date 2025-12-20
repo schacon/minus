@@ -125,7 +125,6 @@ And the help from these projects:-
 - [regex](https://crates.io/crates/regex): Regex support when searching.
 - [crossbeam-channel](https://crates.io/crates/crossbeam-channel): MPMC channel
 - [parking_lot](https://crates.io/crates/parking_lot): Improved atomic storage types
-- [once_cell](https://crates.io/crates/once_cell): Provides one-time initialization types.
 - [tokio](https://crates.io/crates/tokio): Provides runtime for async examples.
 
 ## Get in touch

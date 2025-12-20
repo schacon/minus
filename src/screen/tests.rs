@@ -1,13 +1,13 @@
 mod unterminated {
     use crate::screen::{format_text_block, FormatOpts, Rows};
 
-    const fn get_append_opts_template(text: &str) -> FormatOpts<Rows> {
+    const fn get_append_opts_template(text: &'_ str) -> FormatOpts<'_, Rows> {
         FormatOpts {
             buffer: Vec::new(),
             text,
             attachment: None,
             #[cfg(feature = "search")]
-            search_term: &None,
+            search_term: None,
             lines_count: 0,
             formatted_lines_count: 0,
             cols: 80,

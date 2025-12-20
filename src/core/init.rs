@@ -2,12 +2,12 @@
 //!
 //! This module provides two main functions:-
 //! * The [`init_core`] function which is responsible for setting the initial state of the
-//! Pager, do environment checks and initializing various core functions on either async
-//! tasks or native threads depending on the feature set
+//!   Pager, do environment checks and initializing various core functions on either async
+//!   tasks or native threads depending on the feature set
 //!
 //! * The [`start_reactor`] function displays the displays the output and also polls
-//! the [`Receiver`] held inside the [`Pager`] for events. Whenever a event is
-//! detected, it reacts to it accordingly.
+//!   the [`Receiver`] held inside the [`Pager`] for events. Whenever a event is
+//!   detected, it reacts to it accordingly.
 #[cfg(feature = "static_output")]
 use crate::minus_core::utils::display;
 use crate::{
@@ -52,12 +52,12 @@ use super::{utils::display::draw_for_change, CommandQueue, RUNMODE};
 ///
 /// Then it checks if the minus is running in static mode and does some checks:-
 /// * If standard output is not a terminal screen, that is if it is a file or block
-/// device, minus will write all the data at once to the stdout and quit
+///   device, minus will write all the data at once to the stdout and quit
 ///
 /// * If the size of the data is less than the available number of rows in the terminal
-/// then it displays everything on the main stdout screen at once and quits. This
-/// behaviour can be turned off if [`Pager::set_run_no_overflow(true)`] is called
-/// by the main application
+///   then it displays everything on the main stdout screen at once and quits. This
+///   behaviour can be turned off if [`Pager::set_run_no_overflow(true)`] is called
+///   by the main application
 // Sorry... this behaviour would have been cool to have in async mode, just think about it!!! Many
 // implementations were proposed but none were perfect
 // It is because implementing this especially with line wrapping and terminal scrolling
@@ -65,8 +65,8 @@ use super::{utils::display::draw_for_change, CommandQueue, RUNMODE};
 // using your library... your only weapon
 // So we just don't take any more proposals about this. It is really frustating to
 // to thoroughly test each implementation and fix out all rough edges around it
-/// Next it initializes the runtime and calls [`start_reactor`] and a [`event reader`]` which is
-/// selected based on the enabled feature set:-
+///   Next it initializes the runtime and calls [`start_reactor`] and a [`event reader`]` which is
+///   selected based on the enabled feature set:-
 ///
 /// # Errors
 ///

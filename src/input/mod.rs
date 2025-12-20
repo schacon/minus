@@ -1,7 +1,7 @@
 //! Manage keyboard/mouse-bindings while running `minus`.
 //!
 //! > **Terminology in this module**: We will call any keyboard/mouse event from the terminal as a **binding**
-//! and its associated predefined action as **callback**.
+//! > and its associated predefined action as **callback**.
 //!
 //! There are two ways to define binding in minus as you will see below.
 //!
