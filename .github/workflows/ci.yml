@@ -87,6 +87,17 @@ jobs:
       - name: Run documentation tests
         run: cargo test --doc --all-features
 
+  docs:
+    name: docs
+    env:
+      RUST_BACKTRACE: 1
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run docs generation
+        run: cargo doc --no-deps --document-private-items --keep-going --all-features
+
   lint:
     name: lint
     runs-on: ubuntu-latest
@@ -100,12 +111,8 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --features=dynamic_output,search --tests --examples
+          args: --features=dynamic_output,search --tests --examples -- -D warnings
       - uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --features=dynamic_output,search --tests --examples
-      - uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: --features=static_output,search --tests --examples
+          args: --features=static_output,search --tests --examples -- -D warnings

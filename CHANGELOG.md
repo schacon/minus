@@ -122,7 +122,7 @@ This file documents all changes made to the project and is updated before each r
 
 ## v5.2.0 [2023-03-01]
 ### Added
-* Added `AppendStyle` and `AppendProps` enums in the new `minus_core::utils::text` to control the append behaviour and 
+* Added `AppendStyle` and `AppendProps` enums in the new `minus_core::utils::text` to control the append behaviour and
   properties related to each append operation
 
 ### Changes
@@ -160,7 +160,7 @@ This file documents all changes made to the project and is updated before each r
 
 ## v5.0.4 [2022-07-31]
 ### Added
-* Added dependency on [crossbeam-utils](https://crates.io/crates/crossbeam-utils). 
+* Added dependency on [crossbeam-utils](https://crates.io/crates/crossbeam-utils).
   This allows us to use scoped threads feature provided by it.
 
 ### Changed
@@ -188,17 +188,17 @@ This file documents all changes made to the project and is updated before each r
 - Line Numbers are displayed only on the first wrapped row of each line.
 
   This decreases the clutter on the line number column especially on text which span multiple lines.
-  
+
 - Line Numbers are now padded by about 5 spaces. This makes the line numbers not get tightly packed with the left edge of the terminal.
 
 ### Fixed
-- Fixed bug when appending complex sets of text, a wrong value of `unterminated` got calculated which 
+- Fixed bug when appending complex sets of text, a wrong value of `unterminated` got calculated which
   caused junk text to appended to the `PagerState::formatted_lines` and also to be displayed on the terminal.
 
 - Fixed mouse scroll wheel not scrolling through the screen.
 
    This occurred because a of a previous patch which removed the line that enabled the mouse events to be captured.
- 
+
 * Fix panic when the search term gets changed
 
   This occurred due to the `search_idx` not being repopulated when a new search is activated.
@@ -219,17 +219,17 @@ This file documents all changes made to the project and is updated before each r
   This is the unification of the previous `tokio_lib` and `async_std_lib` features.
   minus no longer depends on `tokio` or `async_std` directly and requires end-application to
   bring in these libs as dependency. **This makes minus completely runtime agnostic**
-  
-* minus can now be called from a OS thread using 
-  [`threads`](https://doc.rust-lang.org/std/thread/index.html). 
+
+* minus can now be called from a OS thread using
+  [`threads`](https://doc.rust-lang.org/std/thread/index.html).
   See example in [README](./README.md#threads)
-  
-* Applications should call `dynamic_paging` on s separate non-blocking thread like 
+
+* Applications should call `dynamic_paging` on s separate non-blocking thread like
   [`tokio::task::spawn_blocking()`](https://docs.rs/tokio/latest/tokio/task/fn.spawn_blocking.html)
   or [`threads`](https://doc.rust-lang.org/std/thread/index.html).
 
 * Use channels for communication
-  
+
   * This allows minus to exactly know when data is changed and do various optimizations on it's
   * Added [`crossbeam_channels`](https://crates.io/crates/crossbeam_channels) as dependency.
 
@@ -237,17 +237,17 @@ This file documents all changes made to the project and is updated before each r
 
   * The `RUNMODE` static item tells minus whether it is running in static mode or asynchronous mode
   * Added `once_cell` as a dependency to store the above value in static scope.
-  
+
 * Added feature to scroll through more than one line
-  * Prefixing any of the movement keys with a number will move the screen up or down to that many lines. 
+  * Prefixing any of the movement keys with a number will move the screen up or down to that many lines.
     For example `10j` will take the view 10 lines down.
-  * Similarly jump to specific line by prefixing `G` with a number. For example `15G` will take you to the 
+  * Similarly jump to specific line by prefixing `G` with a number. For example `15G` will take you to the
     15th line of the data.
-    
+
 * Searching through text with lots of ansi sequence inside it will no longer break the search
   Previously this case would cause the search matcher to not match it and move to the next one
   (#57)
-    
+
 * Added a `PagerState` struct to store and share internal data. It is made public, along with some of its
 fields so that it can be used to implement `InputClassifier` trait for applications that want to modify the
 default keybindings
@@ -263,18 +263,18 @@ default keybindings
   The `handle_input()` function cared about a lot of things and passing everything as a parameter
   was really tedious. This also caused a breaking change whenever a new parameter was added
 
-* Changed function signature of `Pager::new` to `new() -> Pager`. It previously used to return a        
+* Changed function signature of `Pager::new` to `new() -> Pager`. It previously used to return a
   `Result<Pager, TermError>`.
 
-* Use threads even in static paging mode. Although mutating the `Pager`s data won't reflect any changes in  
+* Use threads even in static paging mode. Although mutating the `Pager`s data won't reflect any changes in
   static mode.
-  
-* Replaced `tokio-no-overflow` example with `static-no-overflow` function. This is because the 
+
+* Replaced `tokio-no-overflow` example with `static-no-overflow` function. This is because the
   `Pager::run_no_overflow` function is only available in `static_output`feature.
-  
+
 * All implemented functions on `Pager` except `Pager::new` will return a `Result<(), MinusError>`
   because the communication with the pager may fail if the pager has quit early on.
-  
+
 * Applications should spawn `dynamic_paging` by themselves. For example on tokio, this would be
   ```rust
       use tokio::{task::spawn_blocking, join}
@@ -294,10 +294,10 @@ default keybindings
 * Removed `tokio`, `async-std` and `async-mutex` from dependencies.
 * Removed `Pager::finish` function.
 * Removed `Pager::end_data_stream` function.
-  
-  This was only required for running in dynamic mode with run no overflow on. With deprecation of this 
+
+  This was only required for running in dynamic mode with run no overflow on. With deprecation of this
   feature we no longer need this function
-  
+
 * Removed `static_long` example.
 * Removed `PageAllError` from `static_pager` and `errors` modules.
 
@@ -358,10 +358,10 @@ default keybindings
 ### Fixed
 * Prevent panic if invalid regex is given during search
 * Fix run\_no\_overflow for static pager (#43)
-  
+
    Previously, this setting had no effect if paging static output, due to an if condition in
    `static_pager.rs` which did not consider the setting. This commit makes
-   this setting behave as expected. (@tomstoneham) 
+   this setting behave as expected. (@tomstoneham)
 
 * The cursor is hidden as soon as the search query entry is complete.
 * Fix where color outputs get distorted after search matches
