@@ -5,6 +5,10 @@ pub mod ev_handler;
 #[cfg(any(feature = "dynamic_output", feature = "static_output"))]
 pub mod init;
 pub mod utils;
+
+// TODO: Global statics aren't great and this one, in particular, is making it hard to run tests
+// (since most non-unit tests will end up setting this, which then needs to be unset for the next
+// test). Figure out how to get rid of this.
 pub static RUNMODE: parking_lot::Mutex<RunMode> = parking_lot::const_mutex(RunMode::Uninitialized);
 
 use commands::Command;
@@ -65,7 +69,7 @@ impl CommandQueue {
 }
 
 /// Define the modes in which minus can run
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum RunMode {
     #[cfg(feature = "static_output")]
     Static,

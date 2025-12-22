@@ -56,7 +56,7 @@ use super::{CommandQueue, RUNMODE, utils::display::draw_for_change};
 ///
 /// * If the size of the data is less than the available number of rows in the terminal
 ///   then it displays everything on the main stdout screen at once and quits. This
-///   behaviour can be turned off if [`Pager::set_run_no_overflow(true)`] is called
+///   behaviour can be turned off if [`Pager::set_run_no_overflow`](true) is called
 ///   by the main application
 // Sorry... this behaviour would have been cool to have in async mode, just think about it!!! Many
 // implementations were proposed but none were perfect
@@ -83,18 +83,18 @@ pub fn init_core(pager: &Pager, rm: RunMode) -> std::result::Result<(), MinusErr
     #[cfg(feature = "search")]
     let input_thread_running = Arc::new((Mutex::new(true), Condvar::new()));
 
-    #[allow(unused_mut)]
-    let mut ps = crate::state::PagerState::generate_initial_state(&pager.rx, &mut out)?;
-
     {
         let mut runmode = super::RUNMODE.lock();
-        assert!(
-            runmode.is_uninitialized(),
+        assert_eq!(
+            *runmode,
+            RunMode::Uninitialized,
             "Failed to set the RUNMODE. This is caused probably because another instance of minus is already running"
         );
         *runmode = rm;
-        drop(runmode);
     }
+
+    #[allow(unused_mut)]
+    let mut ps = crate::state::PagerState::generate_initial_state(&pager.rx, &mut out)?;
 
     // Static mode checks
     #[cfg(feature = "static_output")]
@@ -102,9 +102,7 @@ pub fn init_core(pager: &Pager, rm: RunMode) -> std::result::Result<(), MinusErr
         // If stdout is not a tty, write everything and quit
         if !out.is_tty() {
             write_raw_lines(&mut out, &[ps.screen.orig_text], None)?;
-            let mut rm = RUNMODE.lock();
-            *rm = RunMode::Uninitialized;
-            drop(rm);
+            *RUNMODE.lock() = RunMode::Uninitialized;
             return Ok(());
         }
         // If number of lines of text is less than available rows, write everything and quit
@@ -112,9 +110,7 @@ pub fn init_core(pager: &Pager, rm: RunMode) -> std::result::Result<(), MinusErr
         if ps.screen.formatted_lines_count() <= ps.rows && !ps.run_no_overflow {
             write_raw_lines(&mut out, &ps.screen.formatted_lines, Some("\r"))?;
             ps.exit();
-            let mut rm = RUNMODE.lock();
-            *rm = RunMode::Uninitialized;
-            drop(rm);
+            *RUNMODE.lock() = RunMode::Uninitialized;
             return Ok(());
         }
     }
@@ -131,7 +127,7 @@ pub fn init_core(pager: &Pager, rm: RunMode) -> std::result::Result<(), MinusErr
         panic::set_hook(Box::new(move |pinfo| {
             is_exited2.store(true, std::sync::atomic::Ordering::SeqCst);
             // While silently ignoring error is considered a bad practice, we are forced to do it here
-            // as we cannot use the ? and panicking here will cause UB.
+            // as we cannot use the ? and panicking here will (probably?) cause an immediate abort
             drop(term::cleanup(
                 stdout(),
                 &crate::ExitStrategy::PagerQuit,
@@ -169,9 +165,7 @@ pub fn init_core(pager: &Pager, rm: RunMode) -> std::result::Result<(), MinusErr
 
             if res.is_err() {
                 is_exited3.store(true, std::sync::atomic::Ordering::SeqCst);
-                let mut rm = RUNMODE.lock();
-                *rm = RunMode::Uninitialized;
-                drop(rm);
+                *RUNMODE.lock() = RunMode::Uninitialized;
                 term::cleanup(out.as_ref(), &crate::ExitStrategy::PagerQuit, true)?;
             }
             res
@@ -188,9 +182,7 @@ pub fn init_core(pager: &Pager, rm: RunMode) -> std::result::Result<(), MinusErr
 
             if res.is_err() {
                 is_exited4.store(true, std::sync::atomic::Ordering::SeqCst);
-                let mut rm = RUNMODE.lock();
-                *rm = RunMode::Uninitialized;
-                drop(rm);
+                *RUNMODE.lock() = RunMode::Uninitialized;
                 term::cleanup(out_copy.as_ref(), &crate::ExitStrategy::PagerQuit, true)?;
             }
             res
@@ -215,9 +207,8 @@ pub fn init_core(pager: &Pager, rm: RunMode) -> std::result::Result<(), MinusErr
 /// and redraw if it event requires it to do so.
 ///
 /// For example if all rows in a terminal aren't filled and a
-/// [`AppendData`](super::events::Event::AppendData) event occurs, it is absolutely necessory
-/// to update the screen immediately; while if all rows are filled, we can omit to redraw the
-/// screen.
+/// [`AppendData`](super::commands::Command::AppendData) event occurs, it is absolutely necessary to
+/// update the screen immediately; while if all rows are filled, we can omit to redraw the screen.
 #[allow(clippy::too_many_lines)]
 fn start_reactor(
     rx: &Receiver<Command>,

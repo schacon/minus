@@ -39,8 +39,8 @@ pub struct Screen {
     pub(crate) line_count: usize,
     pub(crate) max_line_length: usize,
     /// Unterminated lines
-    /// Keeps track of the number of lines at the last of [PagerState::formatted_lines] which are
-    /// not terminated by a newline
+    /// Keeps track of the number of lines at the last of [Self::formatted_lines] which are not
+    /// terminated by a newline
     pub(crate) unterminated: usize,
     /// Whether to Line wrap lines
     ///
@@ -241,27 +241,27 @@ where
     pub buffer: B,
     /// Contains the incoming text data
     pub text: TextBlock<'a>,
-    /// This is Some when the last line inside minus's present data is unterminated. It contains the last
-    /// line to be attached to the the incoming text
+    /// This is Some when the last line inside minus's present data is unterminated. It contains the
+    /// last line to be attached to the the incoming text
     pub attachment: Option<TextBlock<'a>>,
     /// Status of line numbers
     pub line_numbers: LineNumbers,
-    /// This is equal to the number of lines in [`PagerState::lines`](crate::state::PagerState::lines). This basically tells what line
-    /// number the upcoming line will hold.
+    /// This is equal to the number of lines in [`Screen::orig_text`]. This basically tells what
+    /// line number the upcoming line will hold.
     pub lines_count: usize,
-    /// This is equal to the number of lines in [`PagerState::formatted_lines`](crate::state::PagerState::lines). This is used to
+    /// This is equal to the number of lines in [`Screen::formatted_lines`]. This is used to
     /// calculate the search index of the rows of the line.
     pub formatted_lines_count: usize,
     /// Actual number of columns available for displaying
     pub cols: usize,
-    /// Number of lines that are previously unterminated. It is only relevant when there is `attachment` text otherwise
-    /// it should be 0.
+    /// Number of lines that are previously unterminated. It is only relevant when there is
+    /// `attachment` text otherwise it should be 0.
     pub prev_unterminated: usize,
     /// Search term if a search is active
     #[cfg(feature = "search")]
     pub search_term: Option<&'a regex::Regex>,
 
-    /// Value of [PagerState::line_wrapping]
+    /// Value of [`Screen::line_wrapping`]
     pub line_wrapping: bool,
 }
 
@@ -283,8 +283,7 @@ pub(crate) struct FormatResult {
     /// If search is active, this contains the indices where search matches in the incoming text have been found
     #[cfg(feature = "search")]
     pub append_search_idx: BTreeSet<usize>,
-    /// Map of where first row of each line is placed inside in
-    /// [`PagerState::formatted_lines`](crate::state::PagerState::formatted_lines)
+    /// Map of where first row of each line is placed inside in [`Screen::formatted_lines`]
     pub lines_to_row_map: LinesRowMap,
     /// The length of longest line encountered in the formatted text block
     pub max_line_length: usize,
@@ -489,17 +488,15 @@ where
 ///
 /// - `line`: The line to format
 /// - `line_numbers`: tells whether to format the line with line numbers.
-/// - `len_line_number`: is the number of digits that number of lines in [`PagerState::lines`] occupy.
-///   For example, this will be 2 if number of lines in [`PagerState::lines`] is 50 and 3 if
-///   number of lines in [`PagerState::lines`] is 500. This is used for calculating the padding
-///   of each displayed line.
-/// - `idx`: is the position index where the line is placed in [`PagerState::lines`].
+/// - `len_line_number`: is the number of digits that number of lines in [`Screen::orig_text`]
+///   occupy. For example, this will be 2 if number of lines in [`Screen::line_count`] is 50 and 3
+///   if the number of lines in [`Screen::line_count`] is 500. This is used for calculating the
+///   padding of each displayed line.
+/// - `idx`: is the position index where the line is placed in [`Screen::orig_text`].
 /// - `formatted_idx`: is the position index where the line will be placed in the resulting
-///   [`PagerState::formatted_lines`](crate::state::PagerState::formatted_lines)
+///   [`Screen::formatted_lines`]
 /// - `cols`: Number of columns in the terminal
 /// - `search_term`: Contains the regex if a search is active
-///
-/// [`PagerState::lines`]: crate::state::PagerState::lines
 #[allow(clippy::too_many_arguments)]
 #[allow(clippy::uninlined_format_args)]
 pub(crate) fn formatted_line<'a>(

@@ -386,3 +386,31 @@ impl fmt::Write for Pager {
         self.push_str(s).map_err(|_| fmt::Error)
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+    #[test]
+    #[cfg(feature = "dynamic_output")]
+    fn basic_dynamic_paging() {
+        use super::*;
+        use crate::{RunMode, input::InputEvent, minus_core::RUNMODE};
+
+        // Need to reset this since this test is run in the same process as other tests and they
+        // change the runmode, which causes this test to fail since everything assumes the runmode
+        // isn't already set.
+        *RUNMODE.lock() = RunMode::Uninitialized;
+
+        let pager = Pager::new();
+        pager.follow_output(true).unwrap();
+
+        let pager2 = pager.clone();
+        let pager_thread = std::thread::spawn(move || crate::dynamic_pager::dynamic_paging(pager2));
+
+        pager.tx.send(Command::UserInput(InputEvent::Exit)).unwrap();
+
+        pager_thread.join().unwrap().unwrap();
+
+        *RUNMODE.lock() = RunMode::Uninitialized;
+    }
+}

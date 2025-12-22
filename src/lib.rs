@@ -32,24 +32,29 @@
 //! ## Threads
 //!
 //! ```rust,no_run
-//! use minus::{dynamic_paging, MinusError, Pager};
 //! use std::{
 //!     fmt::Write,
 //!     thread::{spawn, sleep},
 //!     time::Duration
 //! };
 //!
+//! # #[cfg(feature = "dynamic_output")]
+//! use minus::dynamic_paging;
+//! use minus::{MinusError, Pager};
+//!
 //! fn main() -> Result<(), MinusError> {
 //!     // Initialize the pager
 //!     let mut pager = Pager::new();
 //!     // Run the pager in a separate thread
 //!     let pager2 = pager.clone();
+//!     # #[cfg(feature = "dynamic_output")]
 //!     let pager_thread = spawn(move || dynamic_paging(pager2));
 //!
 //!     for i in 0..=100_u32 {
 //!         writeln!(pager, "{}", i);
 //!         sleep(Duration::from_millis(100));
 //!     }
+//!     # #[cfg(feature = "dynamic_output")]
 //!     pager_thread.join().unwrap()?;
 //!     Ok(())
 //! }
@@ -58,9 +63,13 @@
 //! ## tokio
 //!
 //! ```rust,no_run
-//! use minus::{dynamic_paging, MinusError, Pager};
 //! use std::time::Duration;
 //! use std::fmt::Write;
+//!
+//! # #[cfg(feature = "dynamic_output")]
+//! use minus::dynamic_paging;
+//! use minus::{MinusError, Pager};
+//!
 //! use tokio::{join, task::spawn_blocking, time::sleep};
 //!
 //! #[tokio::main]
@@ -79,11 +88,14 @@
 //!     // spawn_blocking(dynamic_paging(...)) creates a separate thread managed by the tokio
 //!     // runtime and runs the async_paging inside it
 //!     let pager = pager.clone();
+//!     # #[cfg(feature = "dynamic_output")]
 //!     let (res1, res2) = join!(spawn_blocking(move || dynamic_paging(pager)), increment);
 //!     // .unwrap() unwraps any error while creating the tokio task
 //!     //  The ? mark unpacks any error that might have occurred while the
 //!     // pager is running
+//!     # #[cfg(feature = "dynamic_output")]
 //!     res1.unwrap()?;
+//!     # #[cfg(feature = "dynamic_output")]
 //!     res2?;
 //!     Ok(())
 //! }
@@ -92,7 +104,10 @@
 //! ## Static output
 //! ```rust,no_run
 //! use std::fmt::Write;
-//! use minus::{MinusError, Pager, page_all};
+//!
+//! # #[cfg(feature = "static_output")]
+//! use minus::page_all;
+//! use minus::{MinusError, Pager};
 //!
 //! fn main() -> Result<(), MinusError> {
 //!     // Initialize a default static configuration
@@ -102,6 +117,7 @@
 //!         writeln!(output, "{}", i)?;
 //!     }
 //!     // Run the pager
+//!     # #[cfg(feature = "static_output")]
 //!     minus::page_all(output)?;
 //!     // Return Ok result
 //!     Ok(())
