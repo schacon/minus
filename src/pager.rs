@@ -2,7 +2,8 @@
 
 use crate::{ExitStrategy, LineNumbers, error::MinusError, input, minus_core::commands::Command};
 use crossbeam_channel::{Receiver, Sender};
-use std::fmt;
+use parking_lot::Mutex;
+use std::{fmt, sync::Arc};
 
 #[cfg(feature = "search")]
 use crate::search::SearchOpts;
@@ -38,6 +39,7 @@ use crate::search::SearchOpts;
 pub struct Pager {
     pub(crate) tx: Sender<Command>,
     pub(crate) rx: Receiver<Command>,
+    pub(crate) exit_position: Arc<Mutex<Option<usize>>>,
 }
 
 impl Pager {
@@ -50,7 +52,11 @@ impl Pager {
     #[must_use]
     pub fn new() -> Self {
         let (tx, rx) = crossbeam_channel::unbounded();
-        Self { tx, rx }
+        Self {
+            tx,
+            rx,
+            exit_position: Arc::new(Mutex::new(None)),
+        }
     }
 
     /// Set the output text to this `t`
@@ -372,6 +378,26 @@ impl Pager {
     pub fn follow_output(&self, follow_output: bool) -> crate::Result {
         self.tx.send(Command::FollowOutput(follow_output))?;
         Ok(())
+    }
+
+    /// Get the line position where the user was viewing when they exited the pager
+    ///
+    /// This returns `None` if the pager hasn't exited yet, or `Some(line_number)` with
+    /// the 0-indexed line number of the top visible line when the user quit.
+    ///
+    /// # Example
+    /// ```
+    /// use minus::Pager;
+    ///
+    /// let pager = Pager::new();
+    /// // ... run the pager ...
+    /// if let Some(line) = pager.exit_position() {
+    ///     println!("User exited at line {}", line);
+    /// }
+    /// ```
+    #[must_use]
+    pub fn exit_position(&self) -> Option<usize> {
+        *self.exit_position.lock()
     }
 }
 

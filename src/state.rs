@@ -153,10 +153,12 @@ pub struct PagerState {
     /// Value for follow mode.
     /// See [follow_output](crate::pager::Pager::follow_output) for more info on follow mode.
     pub(crate) follow_output: bool,
+    /// Shared storage for the exit position (top visible line when user quit)
+    pub(crate) exit_position: Arc<Mutex<Option<usize>>>,
 }
 
 impl PagerState {
-    pub(crate) fn new() -> Result<Self, TermError> {
+    pub(crate) fn new(exit_position: Arc<Mutex<Option<usize>>>) -> Result<Self, TermError> {
         let (cols, rows) = if cfg!(test) {
             // In tests, set  number of columns to 80 and rows to 10
             (80, 10)
@@ -204,6 +206,7 @@ impl PagerState {
             prefix_num: String::new(),
             lines_to_row_map: LinesRowMap::new(),
             follow_output: false,
+            exit_position,
         };
 
         state.format_prompt();
@@ -224,8 +227,9 @@ impl PagerState {
     pub(crate) fn generate_initial_state(
         rx: &Receiver<Command>,
         mut out: &mut Stdout,
+        exit_position: Arc<Mutex<Option<usize>>>,
     ) -> Result<Self, MinusError> {
-        let mut ps = Self::new()?;
+        let mut ps = Self::new(exit_position)?;
         let mut command_queue = CommandQueue::new_zero();
         rx.try_iter().try_for_each(|ev| -> Result<(), MinusError> {
             handle_event(

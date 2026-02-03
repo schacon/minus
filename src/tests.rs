@@ -28,12 +28,14 @@ mod fmt_write {
 
 mod pager_append_str {
     use crate::PagerState;
+    use parking_lot::Mutex;
+    use std::sync::Arc;
 
     #[test]
     fn sequential_append_str() {
         const TEXT1: &str = "This is a line.";
         const TEXT2: &str = " This is a follow up line";
-        let mut ps = PagerState::new().unwrap();
+        let mut ps = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
         ps.append_str(TEXT1);
         ps.append_str(TEXT2);
         assert_eq!(ps.screen.formatted_lines, vec![format!("{TEXT1}{TEXT2}")]);
@@ -44,7 +46,7 @@ mod pager_append_str {
     fn append_sequential_lines() {
         const TEXT1: &str = "This is a line.";
         const TEXT2: &str = " This is a follow up line";
-        let mut ps = PagerState::new().unwrap();
+        let mut ps = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
         ps.append_str(&(TEXT1.to_string() + "\n"));
         ps.append_str(&(TEXT2.to_string() + "\n"));
 
@@ -63,7 +65,7 @@ mod pager_append_str {
             "of weird line endings",
         ];
 
-        let mut ps = PagerState::new().unwrap();
+        let mut ps = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
 
         for line in LINES {
             ps.append_str(line);
@@ -88,7 +90,7 @@ mod pager_append_str {
             "Andthishasnone",
         ];
 
-        let mut ps = PagerState::new().unwrap();
+        let mut ps = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
 
         for line in LINES {
             ps.append_str(line);
@@ -111,7 +113,7 @@ mod pager_append_str {
             "and this is a third line",
         ];
 
-        let mut ps = PagerState::new().unwrap();
+        let mut ps = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
         // For the purpose of testing wrapping while appending strs
         ps.cols = 15;
 
@@ -144,7 +146,7 @@ mod pager_append_str {
             "and this should be on a newline",
         ];
 
-        let mut ps = PagerState::new().unwrap();
+        let mut ps = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
 
         ps.append_str(LINES[0]);
 
@@ -182,7 +184,7 @@ mod pager_append_str {
     fn multiple_newlines() {
         const TEST: &str = "This\n\n\nhas many\n newlines\n";
 
-        let mut ps = PagerState::new().unwrap();
+        let mut ps = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
 
         ps.append_str(TEST);
 
@@ -209,7 +211,7 @@ mod pager_append_str {
     #[test]
     fn append_floating_newline() {
         const TEST: &str = "This is a line with a bunch of\nin between\nbut not at the end";
-        let mut ps = PagerState::new().unwrap();
+        let mut ps = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
         ps.append_str(TEST);
         assert_eq!(
             ps.screen.formatted_lines,
@@ -228,10 +230,11 @@ mod pager_append_str {
 #[test]
 fn exit_callback() {
     use crate::PagerState;
+    use parking_lot::Mutex;
     use std::sync::atomic::Ordering;
     use std::sync::{Arc, atomic::AtomicBool};
 
-    let mut ps = PagerState::new().unwrap();
+    let mut ps = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
     let exited = Arc::new(AtomicBool::new(false));
     let exited_within_callback = exited.clone();
     ps.exit_callbacks.push(Box::new(move || {

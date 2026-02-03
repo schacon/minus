@@ -69,3 +69,8 @@ required-features = ["static_output"]
 name = "msg-tokio"
 path = "examples/msg-tokio.rs"
 required-features = ["dynamic_output"]
+
+[[example]]
+name = "exit-position"
+path = "examples/exit-position.rs"
+required-features = ["static_output"]
