@@ -2,7 +2,8 @@
 #![allow(clippy::cast_possible_truncation)]
 use super::{draw_for_change, draw_full, write_from_pagerstate, write_prompt};
 use crate::{LineNumbers, PagerState};
-use std::fmt::Write;
+use parking_lot::Mutex;
+use std::{fmt::Write, sync::Arc};
 
 // * In some places, where test lines are close to the row, 1 should be added
 // to the rows because `write_lines` does care about the prompt
@@ -14,7 +15,7 @@ use std::fmt::Write;
 #[test]
 fn short_no_line_numbers() {
     let lines = "A line\nAnother line";
-    let mut pager = PagerState::new().unwrap();
+    let mut pager = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
 
     pager.screen.orig_text = lines.to_string();
     pager.format_lines();
@@ -49,7 +50,7 @@ fn long_no_line_numbers() {
 
     // Displaying as much of the lines as possible from the start.
     let mut out = Vec::with_capacity(lines.len());
-    let mut pager = PagerState::new().unwrap();
+    let mut pager = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
     // One extra line for prompt
     pager.rows = 4;
     pager.screen.orig_text = lines.to_string();
@@ -96,7 +97,7 @@ fn short_with_line_numbers() {
     let lines = "A line\nAnother line";
 
     let mut out = Vec::with_capacity(lines.len());
-    let mut pager = PagerState::new().unwrap();
+    let mut pager = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
     pager.screen.orig_text = lines.to_string();
     pager.line_numbers = LineNumbers::Enabled;
     pager.format_lines();
@@ -130,7 +131,7 @@ fn long_with_line_numbers() {
 
     // Displaying as much of the lines as possible from the start.
     let mut out = Vec::with_capacity(lines.len());
-    let mut pager = PagerState::new().unwrap();
+    let mut pager = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
     pager.rows = 4;
     pager.screen.orig_text = lines.to_string();
     pager.line_numbers = LineNumbers::Enabled;
@@ -181,7 +182,7 @@ fn big_line_numbers_are_padded() {
     };
 
     let mut out = Vec::with_capacity(lines.len());
-    let mut pager = PagerState::new().unwrap();
+    let mut pager = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
     pager.upper_mark = 95;
     pager.rows = 11;
     pager.screen.orig_text = lines;
@@ -226,7 +227,7 @@ fn draw_short_no_line_numbers() {
     let lines = "A line\nAnother line";
 
     let mut out = Vec::with_capacity(lines.len());
-    let mut pager = PagerState::new().unwrap();
+    let mut pager = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
     pager.screen.orig_text = lines.to_string();
     pager.line_numbers = LineNumbers::AlwaysOff;
     pager.format_lines();
@@ -261,7 +262,7 @@ fn draw_long_no_line_numbers() {
 
     // Displaying as much of the lines as possible from the start.
     let mut out = Vec::with_capacity(lines.len());
-    let mut pager = PagerState::new().unwrap();
+    let mut pager = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
     pager.rows = 3;
     pager.screen.orig_text = lines.to_string();
     pager.format_lines();
@@ -307,7 +308,7 @@ fn draw_long_no_line_numbers() {
 fn draw_short_with_line_numbers() {
     let lines = "A line\nAnother line";
     let mut out = Vec::with_capacity(lines.len());
-    let mut pager = PagerState::new().unwrap();
+    let mut pager = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
     pager.screen.orig_text = lines.to_string();
     pager.line_numbers = LineNumbers::Enabled;
     pager.format_lines();
@@ -341,7 +342,7 @@ fn draw_long_with_line_numbers() {
 
     // Displaying as much of the lines as possible from the start.
     let mut out = Vec::with_capacity(lines.len());
-    let mut pager = PagerState::new().unwrap();
+    let mut pager = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
     pager.rows = 3;
     pager.screen.orig_text = lines.to_string();
     pager.line_numbers = LineNumbers::Enabled;
@@ -395,7 +396,7 @@ fn draw_big_line_numbers_are_padded() {
     };
 
     let mut out = Vec::with_capacity(lines.len());
-    let mut pager = PagerState::new().unwrap();
+    let mut pager = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
     pager.upper_mark = 95;
     pager.screen.orig_text = lines;
     pager.line_numbers = LineNumbers::Enabled;
@@ -421,7 +422,7 @@ fn draw_wrapping_line_numbers() {
         .join("\n");
 
     let mut out = Vec::new();
-    let mut pager = PagerState::new().unwrap();
+    let mut pager = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
     pager.screen.orig_text = lines;
     pager.cols = 30;
     pager.upper_mark = 2;
@@ -440,7 +441,7 @@ fn draw_help_message() {
     let lines = "A line\nAnother line";
 
     let mut out = Vec::with_capacity(lines.len());
-    let mut pager = PagerState::new().unwrap();
+    let mut pager = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
     pager.screen.orig_text = lines.to_string();
     pager.line_numbers = LineNumbers::AlwaysOff;
     pager.format_prompt();
@@ -455,7 +456,7 @@ fn draw_help_message() {
 fn test_draw_no_overflow() {
     const TEXT: &str = "This is a line of text to the pager";
     let mut out = Vec::with_capacity(TEXT.len());
-    let mut pager = PagerState::new().unwrap();
+    let mut pager = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
     pager.screen.orig_text = TEXT.to_string();
     pager.format_lines();
     draw_full(&mut out, &mut pager).unwrap();
@@ -474,8 +475,8 @@ mod draw_for_change_tests {
         cursor::MoveTo,
         terminal::{Clear, ClearType, ScrollDown, ScrollUp},
     };
-    use std::fmt::Write as FmtWrite;
-    use std::io::Write as IOWrite;
+    use parking_lot::Mutex;
+    use std::{fmt::Write as FmtWrite, io::Write as IOWrite, sync::Arc};
 
     fn create_pager_state() -> PagerState {
         let lines = {
@@ -485,7 +486,7 @@ mod draw_for_change_tests {
             }
             l
         };
-        let mut ps = PagerState::new().unwrap();
+        let mut ps = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
         ps.upper_mark = 0;
         ps.screen.orig_text = lines;
         ps.format_lines();

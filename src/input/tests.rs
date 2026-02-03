@@ -4,6 +4,8 @@ use crate::{LineNumbers, PagerState, input::InputEvent};
 use crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventState, KeyModifiers, MouseEvent, MouseEventKind,
 };
+use parking_lot::Mutex;
+use std::sync::Arc;
 
 // Just a transparent function to fix incompatibility issues between
 // versions
@@ -16,7 +18,7 @@ fn handle_input(ev: Event, p: &PagerState) -> Option<InputEvent> {
 #[test]
 #[allow(clippy::too_many_lines)]
 fn test_kb_nav() {
-    let mut pager = PagerState::new().unwrap();
+    let mut pager = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
     pager.upper_mark = 12;
     pager.line_numbers = LineNumbers::Enabled;
     pager.rows = 5;
@@ -189,7 +191,7 @@ fn test_kb_nav() {
 
 #[test]
 fn test_restore_prompt() {
-    let mut pager = PagerState::new().unwrap();
+    let mut pager = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
     pager.message = Some("Prompt message".to_string());
     {
         // Enter key for one line down when no message on prompt
@@ -209,7 +211,7 @@ fn test_restore_prompt() {
 
 #[test]
 fn test_mouse_nav() {
-    let mut pager = PagerState::new().unwrap();
+    let mut pager = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
     pager.upper_mark = 12;
     pager.line_numbers = LineNumbers::Enabled;
     pager.rows = 5;
@@ -243,7 +245,7 @@ fn test_mouse_nav() {
 
 #[test]
 fn test_saturation() {
-    let mut pager = PagerState::new().unwrap();
+    let mut pager = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
     pager.upper_mark = 12;
     pager.line_numbers = LineNumbers::Enabled;
     pager.rows = 5;
@@ -256,7 +258,7 @@ fn test_saturation() {
             state: KeyEventState::NONE,
         });
         // PagerState for local use
-        let mut pager = PagerState::new().unwrap();
+        let mut pager = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
         pager.upper_mark = usize::MAX;
         pager.line_numbers = LineNumbers::Enabled;
         pager.rows = 5;
@@ -274,7 +276,7 @@ fn test_saturation() {
             state: KeyEventState::NONE,
         });
         // PagerState for local use
-        let mut pager = PagerState::new().unwrap();
+        let mut pager = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
         pager.upper_mark = usize::MIN;
         pager.line_numbers = LineNumbers::Enabled;
         pager.rows = 5;
@@ -287,7 +289,7 @@ fn test_saturation() {
 
 #[test]
 fn test_misc_events() {
-    let mut pager = PagerState::new().unwrap();
+    let mut pager = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
     pager.upper_mark = 12;
     pager.line_numbers = LineNumbers::Enabled;
     pager.rows = 5;
@@ -358,7 +360,7 @@ fn test_misc_events() {
 #[allow(clippy::too_many_lines)]
 #[cfg(feature = "search")]
 fn test_search_bindings() {
-    let mut pager = PagerState::new().unwrap();
+    let mut pager = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
     pager.upper_mark = 12;
     pager.line_numbers = LineNumbers::Enabled;
     pager.rows = 5;

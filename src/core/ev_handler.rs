@@ -40,6 +40,8 @@ pub fn handle_event(
             }
         }
         Command::UserInput(InputEvent::Exit) => {
+            // Store the current line position before exiting
+            *p.exit_position.lock() = Some(p.upper_mark);
             p.exit();
             is_exited.store(true, std::sync::atomic::Ordering::SeqCst);
             term::cleanup(&mut out, &p.exit_strategy, true)?;
@@ -337,8 +339,9 @@ mod tests {
     use super::super::commands::Command;
     use super::handle_event;
     use crate::{ExitStrategy, PagerState, RunMode, minus_core::CommandQueue};
+    use parking_lot::Mutex;
     #[cfg(feature = "search")]
-    use parking_lot::{Condvar, Mutex};
+    use parking_lot::Condvar;
     #[cfg(feature = "search")]
     use std::sync::LazyLock;
     use std::sync::{Arc, atomic::AtomicBool};
@@ -353,7 +356,7 @@ mod tests {
     #[test]
     #[cfg(any(feature = "dynamic_output", feature = "static_output"))]
     fn set_data() {
-        let mut ps = PagerState::new().unwrap();
+        let mut ps = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
         let ev = Command::SetData(TEST_STR.to_string());
         let mut out = Vec::new();
         #[cfg(feature = "dynamic_output")]
@@ -381,7 +384,7 @@ mod tests {
 
     #[test]
     fn append_str() {
-        let mut ps = PagerState::new().unwrap();
+        let mut ps = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
         let ev1 = Command::AppendData(format!("{TEST_STR}\n"));
         let ev2 = Command::AppendData(TEST_STR.to_string());
         let mut out = Vec::new();
@@ -416,7 +419,7 @@ mod tests {
     #[test]
     #[cfg(any(feature = "dynamic_output", feature = "static_output"))]
     fn set_prompt() {
-        let mut ps = PagerState::new().unwrap();
+        let mut ps = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
         let ev = Command::SetPrompt(TEST_STR.to_string());
         let mut out = Vec::new();
         let mut command_queue = CommandQueue::new_zero();
@@ -445,7 +448,7 @@ mod tests {
     #[test]
     #[cfg(any(feature = "dynamic_output", feature = "static_output"))]
     fn send_message() {
-        let mut ps = PagerState::new().unwrap();
+        let mut ps = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
         #[cfg(feature = "dynamic_output")]
         {
             *crate::minus_core::RUNMODE.lock() = RunMode::Dynamic;
@@ -474,7 +477,7 @@ mod tests {
     #[test]
     #[cfg(feature = "static_output")]
     fn set_run_no_overflow() {
-        let mut ps = PagerState::new().unwrap();
+        let mut ps = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
         let ev = Command::SetRunNoOverflow(false);
         let mut out = Vec::new();
         let mut command_queue = CommandQueue::new_zero();
@@ -494,7 +497,7 @@ mod tests {
 
     #[test]
     fn set_exit_strategy() {
-        let mut ps = PagerState::new().unwrap();
+        let mut ps = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
         let ev = Command::SetExitStrategy(ExitStrategy::PagerQuit);
         let mut out = Vec::new();
         let mut command_queue = CommandQueue::new_zero();
@@ -514,7 +517,7 @@ mod tests {
 
     #[test]
     fn add_exit_callback() {
-        let mut ps = PagerState::new().unwrap();
+        let mut ps = PagerState::new(Arc::new(Mutex::new(None))).unwrap();
         let ev = Command::AddExitCallback(Box::new(|| println!("Hello World")));
         let mut out = Vec::new();
         let mut command_queue = CommandQueue::new_zero();
@@ -530,5 +533,22 @@ mod tests {
         )
         .unwrap();
         assert_eq!(ps.exit_callbacks.len(), 1);
+    }
+
+    #[test]
+    fn test_exit_position() {
+        let exit_pos = Arc::new(Mutex::new(None));
+        let mut ps = PagerState::new(Arc::clone(&exit_pos)).unwrap();
+        ps.upper_mark = 42; // Simulate user scrolled to line 42
+
+        // Manually store the position as would happen during exit
+        *ps.exit_position.lock() = Some(ps.upper_mark);
+
+        // Verify the exit position was captured
+        assert_eq!(*exit_pos.lock(), Some(42));
+
+        // Test that the Arc is properly shared
+        let cloned_arc = Arc::clone(&exit_pos);
+        assert_eq!(*cloned_arc.lock(), Some(42));
     }
 }

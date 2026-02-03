@@ -94,7 +94,11 @@ pub fn init_core(pager: &Pager, rm: RunMode) -> std::result::Result<(), MinusErr
     }
 
     #[allow(unused_mut)]
-    let mut ps = crate::state::PagerState::generate_initial_state(&pager.rx, &mut out)?;
+    let mut ps = crate::state::PagerState::generate_initial_state(
+        &pager.rx,
+        &mut out,
+        Arc::clone(&pager.exit_position),
+    )?;
 
     // Static mode checks
     #[cfg(feature = "static_output")]
